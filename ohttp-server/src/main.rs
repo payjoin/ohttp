@@ -107,7 +107,7 @@ async fn main() -> Res<()> {
 
     let config = KeyConfig::new(
         0,
-        Kem::X25519Sha256,
+        Kem::K256Sha256,
         vec![
             SymmetricSuite::new(Kdf::HkdfSha256, Aead::Aes128Gcm),
             SymmetricSuite::new(Kdf::HkdfSha256, Aead::ChaCha20Poly1305),

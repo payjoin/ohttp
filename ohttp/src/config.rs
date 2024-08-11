@@ -277,7 +277,7 @@ mod test {
     use std::iter::zip;
 
     const KEY_ID: KeyId = 1;
-    const KEM: Kem = Kem::X25519Sha256;
+    const KEM: Kem = Kem::K256Sha256;
     const SYMMETRIC: &[SymmetricSuite] = &[
         SymmetricSuite::new(Kdf::HkdfSha256, Aead::Aes128Gcm),
         SymmetricSuite::new(Kdf::HkdfSha256, Aead::ChaCha20Poly1305),

@@ -12,7 +12,7 @@ pub enum Error {
     Format,
     #[cfg(feature = "rust-hpke")]
     #[error("a problem occurred with HPKE: {0}")]
-    Hpke(#[from] ::hpke::HpkeError),
+    Hpke(#[from] ::bitcoin_hpke::HpkeError),
     #[error("an internal error occurred")]
     Internal,
     #[error("the wrong type of key was provided for the selected KEM")]

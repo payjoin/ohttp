@@ -31,7 +31,7 @@ macro_rules! convert_enum {
 
 convert_enum! {
 pub enum Kem {
-    X25519Sha256 = 32,
+    K256Sha256 = 22,
 }
 }
 
@@ -39,14 +39,14 @@ impl Kem {
     #[must_use]
     pub fn n_enc(self) -> usize {
         match self {
-            Kem::X25519Sha256 => 32,
+            Kem::K256Sha256 => 65,
         }
     }
 
     #[must_use]
     pub fn n_pk(self) -> usize {
         match self {
-            Kem::X25519Sha256 => 32,
+            Kem::K256Sha256 => 65,
         }
     }
 }
