@@ -1,13 +1,13 @@
 [package]
-name = "ohttp"
-version = "0.5.3"
-authors = ["Martin Thomson <mt@lowentropy.net>"]
+name = "bitcoin-ohttp"
+version = "0.6.0"
+authors = ["Dan Gould <d@ngould.dev>"]
 edition = "2021"
 rust-version = "1.63.0"
 build = "build.rs"
 license = "MIT OR Apache-2.0"
-description = "Oblivious HTTP"
-repository = "https://github.com/martinthomson/ohttp"
+description = "Oblivious HTTP over secp256k1 and ChaCha20Poly1305"
+repository = "https://github.com/payjoin/bitcoin-ohttp"
 
 [features]
 default = ["client", "server", "rust-hpke"]
@@ -16,9 +16,8 @@ client = []
 external-sqlite = []
 gecko = ["nss", "mozbuild"]
 nss = ["bindgen", "regex-mess"]
-pq = ["hpke-pq"]
 regex-mess = ["regex", "regex-automata", "regex-syntax"]
-rust-hpke = ["rand", "aead", "aes-gcm", "chacha20poly1305", "hkdf", "sha2", "hpke"]
+rust-hpke = ["rand", "aead", "aes-gcm", "chacha20poly1305", "hkdf", "sha2", "bitcoin-hpke"]
 server = []
 
 [dependencies]
@@ -28,7 +27,7 @@ byteorder = "1.4"
 chacha20poly1305 = {version = "0.8", optional = true}
 hex = "0.4"
 hkdf = {version = "0.11", optional = true}
-hpke = {version = "0.11.0", optional = true, default-features = false, features = ["std", "x25519"]}
+bitcoin-hpke = {version = "0.13.0", optional = true, default-features = false, features = ["std", "secp"]}
 lazy_static = "1.4"
 log = {version = "0.4", default-features = false}
 rand = {version = "0.8", optional = true}
@@ -39,16 +38,6 @@ regex-automata = {version = "~0.3", optional = true}
 regex-syntax = {version = "~0.7", optional = true}
 sha2 = {version = "0.9", optional = true}
 thiserror = "1"
-
-[dependencies.hpke-pq]
-package = "hpke_pq"
-version = "0.11.0"
-git = "https://github.com/bwesterb/rust-hpke"
-#branch = "xyber768d00"
-rev = "4e7e359fb7f86d4fa42e1bc38fad7f5c6b224a07"
-optional = true
-default-features = false
-features = ["std", "x25519", "xyber768d00"]
 
 [build-dependencies]
 mozbuild = {version = "0.1", optional = true}

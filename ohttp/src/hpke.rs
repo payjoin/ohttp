@@ -31,10 +31,7 @@ macro_rules! convert_enum {
 
 convert_enum! {
 pub enum Kem {
-    X25519Sha256 = 32,
-
-    #[cfg(feature = "pq")]
-    X25519Kyber768Draft00 = 48,
+    K256Sha256 = 22,
 }
 }
 
@@ -42,20 +39,14 @@ impl Kem {
     #[must_use]
     pub fn n_enc(self) -> usize {
         match self {
-            Kem::X25519Sha256 => 32,
-
-            #[cfg(feature = "pq")]
-            Kem::X25519Kyber768Draft00 => 1120,
+            Kem::K256Sha256 => 65,
         }
     }
 
     #[must_use]
     pub fn n_pk(self) -> usize {
         match self {
-            Kem::X25519Sha256 => 32,
-
-            #[cfg(feature = "pq")]
-            Kem::X25519Kyber768Draft00 => 1216,
+            Kem::K256Sha256 => 65,
         }
     }
 }
