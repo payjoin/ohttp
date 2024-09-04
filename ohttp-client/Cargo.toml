@@ -22,6 +22,7 @@ path= "../bhttp"
 features = ["bhttp", "http"]
 
 [dependencies.ohttp]
+package = "bitcoin-ohttp"
 path= "../ohttp"
 features = ["client"]
 default-features = false

@@ -21,6 +21,7 @@ path= "../bhttp"
 features = ["bhttp", "write-http"]
 
 [dependencies.ohttp]
+package = "bitcoin-ohttp"
 path= "../ohttp"
 features = ["server"]
 default-features = false

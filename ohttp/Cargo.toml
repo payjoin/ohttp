@@ -1,13 +1,13 @@
 [package]
-name = "ohttp"
-version = "0.5.3"
-authors = ["Martin Thomson <mt@lowentropy.net>"]
+name = "bitcoin-ohttp"
+version = "0.6.0"
+authors = ["Dan Gould <d@ngould.dev>"]
 edition = "2021"
 rust-version = "1.63.0"
 build = "build.rs"
 license = "MIT OR Apache-2.0"
-description = "Oblivious HTTP"
-repository = "https://github.com/martinthomson/ohttp"
+description = "Oblivious HTTP over secp256k1 and ChaCha20Poly1305"
+repository = "https://github.com/payjoin/bitcoin-ohttp"
 
 [features]
 default = ["client", "server", "rust-hpke"]
