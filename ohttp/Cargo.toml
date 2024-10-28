@@ -7,7 +7,7 @@ rust-version = "1.63.0"
 build = "build.rs"
 license = "MIT OR Apache-2.0"
 description = "Oblivious HTTP over secp256k1 and ChaCha20Poly1305"
-repository = "https://github.com/payjoin/bitcoin-ohttp"
+repository = "https://github.com/payjoin/ohttp"
 
 [features]
 default = ["client", "server", "rust-hpke"]
