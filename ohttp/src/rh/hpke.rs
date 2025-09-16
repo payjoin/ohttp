@@ -11,8 +11,8 @@ use bitcoin_hpke::{
     setup_receiver, setup_sender, Deserializable, OpModeR, OpModeS, Serializable,
 };
 
-use ::rand::thread_rng;
 use log::trace;
+use rand::thread_rng;
 use std::ops::Deref;
 
 /// Configuration for `Hpke`.
