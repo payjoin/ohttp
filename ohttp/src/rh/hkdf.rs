@@ -5,9 +5,57 @@ use crate::{
     err::{Error, Res},
     hpke::{Aead, Kdf},
 };
-use hkdf::Hkdf as HkdfImpl;
+use bitcoin_hashes::{Hash, HashEngine, Hmac, HmacEngine, sha256, sha384, sha512};
 use log::trace;
-use sha2::{Sha256, Sha384, Sha512};
+
+/// One HMAC-Hash invocation over `data` keyed with `key`.
+fn hmac<T: Hash>(key: &[u8], data: &[u8]) -> Vec<u8>
+where
+    <T as Hash>::Bytes: AsRef<[u8]>,
+{
+    let mut engine = HmacEngine::<T>::new(key);
+    engine.input(data);
+    Hmac::<T>::from_engine(engine)
+        .as_byte_array()
+        .as_ref()
+        .to_vec()
+}
+
+/// RFC 5869 HKDF-Extract. An empty salt and a HashLen-of-zeros salt are equivalent
+/// here, since HMAC zero-pads the key to the block size either way.
+fn extract_with<T: Hash>(salt: &[u8], ikm: &[u8]) -> Vec<u8>
+where
+    <T as Hash>::Bytes: AsRef<[u8]>,
+{
+    hmac::<T>(salt, ikm)
+}
+
+/// RFC 5869 HKDF-Expand. Errors if `len` would need more than 255 blocks.
+fn expand_with<T: Hash>(prk: &[u8], info: &[u8], len: usize) -> Res<Vec<u8>>
+where
+    <T as Hash>::Bytes: AsRef<[u8]>,
+{
+    let mut okm: Vec<u8> = Vec::with_capacity(len);
+    let mut block: Vec<u8> = Vec::new();
+    let mut counter: u8 = 1;
+    while okm.len() < len {
+        let mut engine = HmacEngine::<T>::new(prk);
+        engine.input(&block);
+        engine.input(info);
+        engine.input(&[counter]);
+        block = Hmac::<T>::from_engine(engine)
+            .as_byte_array()
+            .as_ref()
+            .to_vec();
+        okm.extend_from_slice(&block);
+        if okm.len() >= len {
+            break;
+        }
+        counter = counter.checked_add(1).ok_or(Error::Internal)?;
+    }
+    okm.truncate(len);
+    Ok(okm)
+}
 
 #[derive(Clone, Copy)]
 pub enum KeyMechanism {
@@ -48,17 +96,14 @@ impl Hkdf {
 
     #[allow(clippy::unnecessary_wraps)]
     pub fn extract(&self, salt: &[u8], ikm: &SymKey) -> Res<SymKey> {
-        let prk = match self {
-            Self::Sha256 => {
-                SymKey::from(HkdfImpl::<Sha256>::extract(Some(salt), &ikm.0).0.as_slice())
+        let prk = SymKey::from(
+            match self {
+                Self::Sha256 => extract_with::<sha256::Hash>(salt, &ikm.0),
+                Self::Sha384 => extract_with::<sha384::Hash>(salt, &ikm.0),
+                Self::Sha512 => extract_with::<sha512::Hash>(salt, &ikm.0),
             }
-            Self::Sha384 => {
-                SymKey::from(HkdfImpl::<Sha384>::extract(Some(salt), &ikm.0).0.as_slice())
-            }
-            Self::Sha512 => {
-                SymKey::from(HkdfImpl::<Sha512>::extract(Some(salt), &ikm.0).0.as_slice())
-            }
-        };
+            .as_slice(),
+        );
         trace!(
             "HKDF extract: salt={} ikm={:?} prk={:?}",
             hex::encode(salt),
@@ -80,21 +125,11 @@ impl Hkdf {
     }
 
     pub fn expand_data(&self, prk: &SymKey, info: &[u8], len: usize) -> Res<Vec<u8>> {
-        let mut okm = vec![0; len];
-        match self {
-            Self::Sha256 => {
-                let h = HkdfImpl::<Sha256>::from_prk(&prk.0).map_err(|_| Error::Internal)?;
-                h.expand(info, &mut okm).map_err(|_| Error::Internal)?;
-            }
-            Self::Sha384 => {
-                let h = HkdfImpl::<Sha384>::from_prk(&prk.0).map_err(|_| Error::Internal)?;
-                h.expand(info, &mut okm).map_err(|_| Error::Internal)?;
-            }
-            Self::Sha512 => {
-                let h = HkdfImpl::<Sha512>::from_prk(&prk.0).map_err(|_| Error::Internal)?;
-                h.expand(info, &mut okm).map_err(|_| Error::Internal)?;
-            }
-        }
+        let okm = match self {
+            Self::Sha256 => expand_with::<sha256::Hash>(&prk.0, info, len)?,
+            Self::Sha384 => expand_with::<sha384::Hash>(&prk.0, info, len)?,
+            Self::Sha512 => expand_with::<sha512::Hash>(&prk.0, info, len)?,
+        };
         trace!(
             "HKDF expand_data: prk={:?} info={} len={} okm={:?}",
             prk,
