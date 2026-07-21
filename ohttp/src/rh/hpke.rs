@@ -98,7 +98,7 @@ impl PrivateKey {
 
 impl std::fmt::Debug for PrivateKey {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        if let Ok(b) = self.key_data() {
+        if self.key_data().is_ok() {
             write!(f, "PrivateKey [REDACTED]")
         } else {
             write!(f, "Opaque PrivateKey")
