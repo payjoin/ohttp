@@ -4,7 +4,7 @@ use thiserror::Error;
 pub enum Error {
     #[cfg(feature = "rust-hpke")]
     #[error("a problem occurred with the AEAD")]
-    Aead(#[from] aead::Error),
+    Aead,
     #[cfg(feature = "nss")]
     #[error("a problem occurred during cryptographic processing: {0}")]
     Crypto(#[from] crate::nss::Error),
