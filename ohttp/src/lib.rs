@@ -313,10 +313,10 @@ impl ClientResponse {
 #[cfg(all(test, feature = "client", feature = "server"))]
 mod test {
     use crate::{
+        ClientRequest, Error, KeyConfig, KeyId, Server,
         config::SymmetricSuite,
         err::Res,
         hpke::{Aead, Kdf, Kem},
-        ClientRequest, Error, KeyConfig, KeyId, Server,
     };
     use log::trace;
     use std::{fmt::Debug, io::ErrorKind};

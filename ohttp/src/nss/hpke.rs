@@ -1,7 +1,7 @@
 use super::{
     super::hpke::{Aead, Kdf, Kem},
-    err::{sec::SEC_ERROR_INVALID_ARGS, secstatus_to_res, Error},
-    p11::{sys, Item, PrivateKey, PublicKey, Slot, SymKey},
+    err::{Error, sec::SEC_ERROR_INVALID_ARGS, secstatus_to_res},
+    p11::{Item, PrivateKey, PublicKey, Slot, SymKey, sys},
 };
 use crate::err::Res;
 use log::{log_enabled, trace};
@@ -292,7 +292,7 @@ pub fn generate_key_pair(kem: Kem) -> Res<(PrivateKey, PublicKey)> {
 
 #[cfg(test)]
 mod test {
-    use super::{generate_key_pair, Config, HpkeContext, HpkeR, HpkeS};
+    use super::{Config, HpkeContext, HpkeR, HpkeS, generate_key_pair};
     use crate::{hpke::Aead, init};
 
     const INFO: &[u8] = b"info";

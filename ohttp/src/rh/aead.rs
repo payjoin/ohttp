@@ -121,7 +121,7 @@ impl Aead {
 mod test {
     use super::{
         super::super::{hpke::Aead as AeadId, init},
-        Aead, Mode, SequenceNumber, NONCE_LEN,
+        Aead, Mode, NONCE_LEN, SequenceNumber,
     };
 
     /// Check that the first invocation of encryption matches expected values.

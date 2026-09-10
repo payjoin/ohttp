@@ -473,7 +473,9 @@ mod nss {
                 "NSS_DIR path (obtained via `env`) does not exist: {}",
                 nss_dir.display()
             );
-            panic!("It looks like NSS is not built. Please run `libs/verify-[platform]-environment.sh` in application-services first!");
+            panic!(
+                "It looks like NSS is not built. Please run `libs/verify-[platform]-environment.sh` in application-services first!"
+            );
         }
 
         let lib_dir = nss_dir.join("lib");

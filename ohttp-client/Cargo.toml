@@ -2,7 +2,7 @@
 name = "ohttp-client"
 version = "0.5.3"
 authors = ["Martin Thomson <mt@lowentropy.net>"]
-edition = "2021"
+edition = "2024"
 
 [features]
 default = ["rust-hpke"]

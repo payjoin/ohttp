@@ -1,14 +1,15 @@
 use super::SymKey;
 use crate::{
-    hpke::{Aead, Kdf, Kem},
     Error, Res,
+    hpke::{Aead, Kdf, Kem},
 };
 
 use bitcoin_hpke::{
+    Deserializable, OpModeR, OpModeS, Serializable,
     aead::{AeadCtxR, AeadCtxS, AeadTag, ChaCha20Poly1305},
     kdf::HkdfSha256,
     kem::{Kem as KemTrait, SecpK256HkdfSha256},
-    setup_receiver, setup_sender, Deserializable, OpModeR, OpModeS, Serializable,
+    setup_receiver, setup_sender,
 };
 
 use ::rand::thread_rng;
@@ -419,7 +420,7 @@ pub fn derive_key_pair(kem: Kem, ikm: &[u8]) -> Res<(PrivateKey, PublicKey)> {
 
 #[cfg(test)]
 mod test {
-    use super::{generate_key_pair, Config, HpkeR, HpkeS};
+    use super::{Config, HpkeR, HpkeS, generate_key_pair};
     use crate::{
         hpke::{Aead, Kem},
         init,
