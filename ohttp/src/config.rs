@@ -181,8 +181,9 @@ impl KeyConfig {
         let key_id = r.read_u8()?;
         let kem = Kem::try_from(r.read_u16::<NetworkEndian>()?)?;
 
-        // Note that the KDF and AEAD doesn't matter here.
-        let kem_config = HpkeConfig::new(kem, Kdf::HkdfSha256, AeadId::Aes128Gcm);
+        // Only the KEM is being validated here. The KDF and AEAD are filled with a
+        // pair this backend implements so the check cannot fail on them.
+        let kem_config = HpkeConfig::new(kem, Kdf::HkdfSha256, AeadId::ChaCha20Poly1305);
         if !kem_config.supported() {
             return Err(Error::Unsupported);
         }
@@ -210,6 +211,12 @@ impl KeyConfig {
         }
 
         Self::strip_unsupported(&mut symmetric, kem);
+        // A config whose every suite is one this backend cannot perform is unusable.
+        // Report it like an unsupported KEM, so `decode_list` skips it and a client
+        // never selects from an empty suite list.
+        if symmetric.is_empty() {
+            return Err(Error::Unsupported);
+        }
         let pk = HpkeR::decode_public_key(kem_config.kem(), &pk_buf)?;
 
         Ok(Self {
@@ -241,7 +248,7 @@ impl KeyConfig {
             r.consume(len);
             match res {
                 Ok(config) => configs.push(config),
-                Err(Error::Unsupported) => continue,
+                Err(Error::Unsupported) => {}
                 Err(e) => return Err(e),
             }
         }
@@ -278,10 +285,8 @@ mod test {
 
     const KEY_ID: KeyId = 1;
     const KEM: Kem = Kem::K256Sha256;
-    const SYMMETRIC: &[SymmetricSuite] = &[
-        SymmetricSuite::new(Kdf::HkdfSha256, Aead::Aes128Gcm),
-        SymmetricSuite::new(Kdf::HkdfSha256, Aead::ChaCha20Poly1305),
-    ];
+    const SYMMETRIC: &[SymmetricSuite] =
+        &[SymmetricSuite::new(Kdf::HkdfSha256, Aead::ChaCha20Poly1305)];
 
     #[test]
     fn encode_decode_config_list() {
@@ -364,13 +369,41 @@ mod test {
     fn truncate_kdf_aead_list() {
         init();
 
-        let mut x25519 = KeyConfig::new(KEY_ID, KEM, Vec::from(SYMMETRIC))
+        let mut encoded = KeyConfig::new(KEY_ID, KEM, Vec::from(SYMMETRIC))
             .unwrap()
             .encode()
             .unwrap();
-        x25519.truncate(38);
-        assert_eq!(usize::from(x25519[36]), SYMMETRIC.len() * 4);
-        x25519[36] = 1;
-        assert!(matches!(KeyConfig::decode(&x25519), Err(Error::Format)));
+        // The suite list sits at the end, preceded by its u16 length; derive the offset
+        // rather than hard-coding one, since the public key size depends on the KEM.
+        let len_lo = encoded.len() - SYMMETRIC.len() * 4 - 1;
+        assert_eq!(usize::from(encoded[len_lo]), SYMMETRIC.len() * 4);
+        // A length that isn't a whole number of suites must be rejected.
+        encoded[len_lo] = 1;
+        assert!(matches!(KeyConfig::decode(&encoded), Err(Error::Format)));
+    }
+
+    /// A config that offers only suites this backend cannot perform is unsupported,
+    /// not a config with nothing in it.
+    #[test]
+    fn decode_rejects_config_with_no_supported_suite() {
+        init();
+
+        let mut encoded = KeyConfig::new(KEY_ID, KEM, Vec::from(SYMMETRIC))
+            .unwrap()
+            .encode()
+            .unwrap();
+        // The AEAD id is the last field of the last suite; swap it for AES-128-GCM.
+        let aead_at = encoded.len() - 2;
+        encoded[aead_at..].copy_from_slice(&u16::from(Aead::Aes128Gcm).to_be_bytes());
+        assert!(matches!(
+            KeyConfig::decode(&encoded),
+            Err(Error::Unsupported)
+        ));
+
+        // In a list, such a config is skipped rather than failing the whole list.
+        let mut list = Vec::new();
+        list.extend_from_slice(&u16::try_from(encoded.len()).unwrap().to_be_bytes());
+        list.extend_from_slice(&encoded);
+        assert!(KeyConfig::decode_list(&list).unwrap().is_empty());
     }
 }

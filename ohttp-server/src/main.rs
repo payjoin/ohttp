@@ -108,10 +108,7 @@ async fn main() -> Res<()> {
     let config = KeyConfig::new(
         0,
         Kem::K256Sha256,
-        vec![
-            SymmetricSuite::new(Kdf::HkdfSha256, Aead::Aes128Gcm),
-            SymmetricSuite::new(Kdf::HkdfSha256, Aead::ChaCha20Poly1305),
-        ],
+        vec![SymmetricSuite::new(Kdf::HkdfSha256, Aead::ChaCha20Poly1305)],
     )?;
     let ohttp = OhttpServer::new(config)?;
     println!(

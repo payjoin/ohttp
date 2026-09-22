@@ -42,7 +42,7 @@ impl Config {
 
     pub fn supported(self) -> bool {
         // TODO support more options
-        self.kdf == Kdf::HkdfSha256 && matches!(self.aead, Aead::Aes128Gcm | Aead::ChaCha20Poly1305)
+        self.kdf == Kdf::HkdfSha256 && self.aead == Aead::ChaCha20Poly1305
     }
 }
 
@@ -98,7 +98,7 @@ impl PrivateKey {
 
 impl std::fmt::Debug for PrivateKey {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        if let Ok(b) = self.key_data() {
+        if self.key_data().is_ok() {
             write!(f, "PrivateKey [REDACTED]")
         } else {
             write!(f, "Opaque PrivateKey")
@@ -401,7 +401,7 @@ pub fn generate_key_pair(kem: Kem) -> Res<(PrivateKey, PublicKey)> {
             (PrivateKey::K256(sk), PublicKey::K256(pk))
         }
     };
-    trace!("Generated key pair: sk={:?} pk={:?}", sk, pk);
+    trace!("Generated key pair: sk={sk:?} pk={pk:?}");
     Ok((sk, pk))
 }
 
@@ -413,7 +413,7 @@ pub fn derive_key_pair(kem: Kem, ikm: &[u8]) -> Res<(PrivateKey, PublicKey)> {
             (PrivateKey::K256(sk), PublicKey::K256(pk))
         }
     };
-    trace!("Derived key pair: sk={:?} pk={:?}", sk, pk);
+    trace!("Derived key pair: sk={sk:?} pk={pk:?}");
     Ok((sk, pk))
 }
 
@@ -460,11 +460,6 @@ mod test {
         let mut hpke_r = HpkeR::new(cfg, &pk_r, &sk_r, &enc, INFO).unwrap();
         let pt = hpke_r.open(AAD, &ct).unwrap();
         assert_eq!(&pt[..], PT);
-    }
-
-    #[test]
-    fn seal_open_gcm() {
-        seal_open(Aead::Aes128Gcm, Kem::K256Sha256);
     }
 
     #[test]
