@@ -395,7 +395,7 @@ mod test {
         match res.unwrap_err() {
             Error::Truncated => {}
             #[cfg(feature = "rust-hpke")]
-            Error::Aead(_) => {}
+            Error::Aead => {}
             #[cfg(feature = "nss")]
             Error::Crypto(_) => {}
             Error::Io(e) => assert_eq!(e.kind(), ErrorKind::UnexpectedEof),
