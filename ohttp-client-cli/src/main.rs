@@ -1,7 +1,7 @@
 #![deny(warnings, clippy::pedantic)]
 
 use bhttp::{Message, Mode};
-use ohttp::{init, ClientRequest};
+use ohttp::{ClientRequest, init};
 use std::io::{self, BufRead, Write};
 
 fn main() {

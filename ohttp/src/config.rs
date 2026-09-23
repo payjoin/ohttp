@@ -1,7 +1,7 @@
 use crate::{
+    KeyId,
     err::{Error, Res},
     hpke::{Aead as AeadId, Kdf, Kem},
-    KeyId,
 };
 use byteorder::{NetworkEndian, ReadBytesExt, WriteBytesExt};
 use std::{
@@ -11,13 +11,13 @@ use std::{
 
 #[cfg(feature = "nss")]
 use crate::nss::{
-    hpke::{generate_key_pair, Config as HpkeConfig, HpkeR},
     PrivateKey, PublicKey,
+    hpke::{Config as HpkeConfig, HpkeR, generate_key_pair},
 };
 
 #[cfg(feature = "rust-hpke")]
 use crate::rh::hpke::{
-    derive_key_pair, generate_key_pair, Config as HpkeConfig, HpkeR, PrivateKey, PublicKey,
+    Config as HpkeConfig, HpkeR, PrivateKey, PublicKey, derive_key_pair, generate_key_pair,
 };
 
 /// A tuple of KDF and AEAD identifiers.
@@ -278,8 +278,9 @@ impl AsRef<Self> for KeyConfig {
 #[cfg(test)]
 mod test {
     use crate::{
+        Error, KeyConfig, KeyId, SymmetricSuite,
         hpke::{Aead, Kdf, Kem},
-        init, Error, KeyConfig, KeyId, SymmetricSuite,
+        init,
     };
     use std::iter::zip;
 

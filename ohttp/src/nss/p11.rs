@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::err::{secstatus_to_res, Error};
+use super::err::{Error, secstatus_to_res};
 use crate::err::Res;
 use std::{
     convert::TryFrom,
@@ -28,11 +28,11 @@ pub mod sys {
 }
 
 use sys::{
-    PK11ObjectType, PK11SlotInfo, PK11SymKey, PK11_ExtractKeyValue, PK11_FreeSlot, PK11_FreeSymKey,
+    CK_ATTRIBUTE_TYPE, CKA_VALUE, PK11_ExtractKeyValue, PK11_FreeSlot, PK11_FreeSymKey,
     PK11_GenerateRandom, PK11_GetInternalSlot, PK11_GetKeyData, PK11_ReadRawAttribute,
-    PK11_ReferenceSymKey, PRBool, SECITEM_FreeItem, SECItem, SECItemType, SECKEYPrivateKey,
-    SECKEYPublicKey, SECKEY_DestroyPrivateKey, SECKEY_DestroyPublicKey, CKA_VALUE,
-    CK_ATTRIBUTE_TYPE,
+    PK11_ReferenceSymKey, PK11ObjectType, PK11SlotInfo, PK11SymKey, PRBool, SECITEM_FreeItem,
+    SECItem, SECItemType, SECKEY_DestroyPrivateKey, SECKEY_DestroyPublicKey, SECKEYPrivateKey,
+    SECKEYPublicKey,
 };
 
 macro_rules! scoped_ptr {

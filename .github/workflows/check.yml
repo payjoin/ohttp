@@ -10,26 +10,29 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
 
-# This fork ships one configuration: the rust-hpke backend with the secp256k1 DHKEM
-# from bitcoin-hpke, on stable Rust. That is what CI gates.
+# This fork ships the rust-hpke backend with the secp256k1 DHKEM from bitcoin-hpke.
 #
 # Not in the matrix, on purpose:
 # - nss: NSS has no secp256k1 DHKEM, and the backend has not compiled since the Kem
 #   enum was pruned to K256Sha256 (bac8f2c). Drop or delete is a separate decision.
-# - an MSRV toolchain: the declared MSRV cannot resolve current transitive
-#   dependencies. Restore the leg when #6 is settled.
 
 jobs:
   check:
-    name: Continuous Integration (rust-hpke, stable)
+    name: Continuous Integration (rust-hpke)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - 1.85.0 # MSRV
+          - stable
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.rust }}
           components: rustfmt, clippy
 
       - name: Build

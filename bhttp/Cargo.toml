@@ -2,8 +2,8 @@
 name = "bhttp"
 version = "0.5.3"
 authors = ["Martin Thomson <mt@lowentropy.net>"]
-edition = "2021"
-rust-version = "1.63.0"
+edition = "2024"
+rust-version = "1.85.0"
 license = "MIT OR Apache-2.0"
 description = "Binary HTTP messages (RFC 9292)"
 repository = "https://github.com/martinthomson/ohttp"
@@ -20,6 +20,8 @@ write-http = []
 [dependencies]
 thiserror = "1"
 url = {version = "2", optional = true}
+
+yoke-derive = "=0.8.2"
 
 [dev-dependencies]
 hex = "0.4"

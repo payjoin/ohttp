@@ -31,8 +31,8 @@ pub use err::Error;
 ))]
 use err::Res;
 #[cfg(feature = "read-http")]
-use parse::{downcase, is_ows, read_line, split_at, COLON, SEMICOLON, SLASH, SP};
-use parse::{index_of, trim_ows, COMMA};
+use parse::{COLON, SEMICOLON, SLASH, SP, downcase, is_ows, read_line, split_at};
+use parse::{COMMA, index_of, trim_ows};
 #[cfg(feature = "read-bhttp")]
 use rw::{read_varint, read_vec};
 #[cfg(feature = "write-bhttp")]
@@ -401,11 +401,7 @@ impl ControlData {
     #[must_use]
     pub fn path(&self) -> Option<&[u8]> {
         if let Self::Request { path, .. } = self {
-            if path.is_empty() {
-                None
-            } else {
-                Some(path)
-            }
+            if path.is_empty() { None } else { Some(path) }
         } else {
             None
         }
